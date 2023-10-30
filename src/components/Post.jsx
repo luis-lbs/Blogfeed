@@ -1,11 +1,31 @@
 /* eslint-disable react/prop-types */
+import { useState } from 'react';
+import { Comment } from './Comment';
 import s from './Post.module.css';
-export function Post({ author, content }) {
+import { Avatar } from './Avatar';
+
+export function Post() {
+  const [comments, setComments] = useState([]);
+  const avatarUrl = 'https://github.com/luis-lbs.png'
+
+  const createComment = (event) => {
+    event.preventDefault();
+    let content = document.getElementById('commentText').value;
+    let comment = {
+      avatar: avatarUrl,
+      content,
+      author: 'luis felipe',
+      upVotes: 0,
+    };
+    setComments([...comments, comment]);
+    document.getElementById('commentText').value = '';
+  };
+
   return (
     <article className={s.post}>
       <header>
         <div className={s.author}>
-          <img src="https://github.com/luis-lbs.png" className={s.avatar} />
+          <Avatar url={avatarUrl}/>
           <div className={s.authorInfo}>
             <strong>Luis Felipe</strong>
             <span>Web Developer</span>
@@ -35,11 +55,26 @@ export function Post({ author, content }) {
 
       <form className={s.commentForm}>
         <strong>Deixe seu feedback</strong>
-        <textarea placeholder="Deixe um comentário"></textarea>
+        <textarea id="commentText" placeholder="Deixe um comentário"></textarea>
         <div className={s.buttonArea}>
-          <button type="submit">Publicar</button>
+          <button type="submit" onClick={(e) => createComment(e)}>
+            Publicar
+          </button>
         </div>
       </form>
+
+      <div className={s.commentList}>
+        {comments.length > 0 &&
+          comments.map((comment, index) => (
+            <Comment
+              key={index}
+              author={comment.author}
+              avatar={comment.avatar}
+              content={comment.content}
+              upVotes={comment.upVotes}
+            />
+          ))}
+      </div>
     </article>
   );
 }
