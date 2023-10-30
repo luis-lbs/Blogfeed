@@ -4,31 +4,33 @@ import { Comment } from './Comment';
 import s from './Post.module.css';
 import { Avatar } from './Avatar';
 
-export function Post() {
-  const [comments, setComments] = useState([]);
-  const avatarUrl = 'https://github.com/luis-lbs.png'
+export function Post({ postData }) {
+  const [post, setPost] = useState(postData);
 
   const createComment = (event) => {
     event.preventDefault();
     let content = document.getElementById('commentText').value;
     let comment = {
-      avatar: avatarUrl,
+      author: 'luis-lbs',
+      avatarUrl: 'https://github.com/luis-lbs.png',
       content,
-      author: 'luis felipe',
       upVotes: 0,
     };
-    setComments([...comments, comment]);
+    setPost((prev) => {
+      let next = JSON.parse(JSON.stringify(prev));
+      next.comments.unshift(comment);
+      return next;
+    });
     document.getElementById('commentText').value = '';
   };
-
   return (
-    <article className={s.post}>
+    <article className={s.post} key={`mainPost-${post.id}`}>
       <header>
         <div className={s.author}>
-          <Avatar url={avatarUrl}/>
+          <Avatar url={post.author.avatarUrl} />
           <div className={s.authorInfo}>
-            <strong>Luis Felipe</strong>
-            <span>Web Developer</span>
+            <strong>{post.author.name}</strong>
+            <span>{post.author.role}</span>
           </div>
         </div>
 
@@ -37,20 +39,7 @@ export function Post() {
         </time>
       </header>
       <div className={s.content}>
-        <p>Fala galeraa 👋</p>
-
-        <p>
-          Estou terminando de subir mais um projeto no meu portifa. É um dos
-          projetos que fiz durante a trilha ignite da Rocketseat 🚀. O nome do
-          projeto é Blogfeed
-        </p>
-
-        <p>assim que estiver online na vercel compartilho aqui com vocês 🌟</p>
-
-        <p>
-          <a href="">#novoprojeto </a> <a href="">#nlw </a>{' '}
-          <a href="">#rocketseat</a>
-        </p>
+        <p>{post.content}</p>
       </div>
 
       <form className={s.commentForm}>
@@ -64,12 +53,12 @@ export function Post() {
       </form>
 
       <div className={s.commentList}>
-        {comments.length > 0 &&
-          comments.map((comment, index) => (
+        {post.comments.length > 0 &&
+          post.comments.map((comment, index) => (
             <Comment
-              key={index}
+              key={`comment-${index}`}
               author={comment.author}
-              avatar={comment.avatar}
+              avatar={comment.avatarUrl}
               content={comment.content}
               upVotes={comment.upVotes}
             />
