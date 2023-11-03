@@ -3,26 +3,60 @@ import { useState } from 'react';
 import { Comment } from './Comment';
 import s from './Post.module.css';
 import { Avatar } from './Avatar';
+import { format, formatDistanceToNow } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 export function Post({ postData }) {
   const [post, setPost] = useState(postData);
+  const [commentContent, setCommentContent] = useState('');
+
+  const postDate = format(postData.publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
+    locale: ptBR,
+  });
+  const postDateRelativeToNow = formatDistanceToNow(postData.publishedAt, {
+    locale: ptBR,
+    addSuffix: true,
+  });
 
   const createComment = (event) => {
     event.preventDefault();
-    let content = document.getElementById('commentText').value;
     let comment = {
+      id: post.comments.length + 1,
       author: 'luis-lbs',
       avatarUrl: 'https://github.com/luis-lbs.png',
-      content,
+      content: commentContent,
       upVotes: 0,
     };
+
     setPost((prev) => {
       let next = JSON.parse(JSON.stringify(prev));
       next.comments.unshift(comment);
       return next;
     });
-    document.getElementById('commentText').value = '';
+    setCommentContent('');
   };
+
+  const deleteComment = (commentId) => {
+    setPost((prev) => {
+      let next = JSON.parse(JSON.stringify(prev));
+      next.comments = next.comments.filter(
+        (comment) => comment.id !== commentId
+      );
+      return next;
+    });
+  };
+
+  const handleUpVote = (commentId) => {
+    setPost((prev) => {
+      let next = JSON.parse(JSON.stringify(prev));
+      let currentComment = next.comments.find(
+        (comment) => (comment.id = commentId)
+      );
+      currentComment.upVotes += 1;
+      return next;
+    });
+  };
+
   return (
     <article className={s.post} key={`mainPost-${post.id}`}>
       <header>
@@ -34,19 +68,27 @@ export function Post({ postData }) {
           </div>
         </div>
 
-        <time title="6 de outubro às 15:38" dateTime="2023-10-06">
-          Publicado há 1h
+        <time title={postDate} dateTime={() => post.publishedAt.toISOString()}>
+          {`públicado hà ${postDateRelativeToNow}`}
         </time>
       </header>
       <div className={s.content}>
         <p>{post.content}</p>
       </div>
 
-      <form className={s.commentForm}>
+      <form className={s.commentForm} onSubmit={(e) => createComment(e)}>
         <strong>Deixe seu feedback</strong>
-        <textarea id="commentText" placeholder="Deixe um comentário"></textarea>
+        <textarea
+          placeholder="Deixe um comentário"
+          value={commentContent}
+          onChange={(e) => setCommentContent(e.target.value)}
+          required
+        ></textarea>
         <div className={s.buttonArea}>
-          <button type="submit" onClick={(e) => createComment(e)}>
+          <button
+            type="submit"
+            disabled={commentContent.length == 0 ? true : false}
+          >
             Publicar
           </button>
         </div>
@@ -57,10 +99,13 @@ export function Post({ postData }) {
           post.comments.map((comment, index) => (
             <Comment
               key={`comment-${index}`}
+              id={comment.id}
               author={comment.author}
               avatar={comment.avatarUrl}
               content={comment.content}
               upVotes={comment.upVotes}
+              deleteComment={deleteComment}
+              handleUpVote={handleUpVote}
             />
           ))}
       </div>

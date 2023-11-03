@@ -3,7 +3,7 @@ import { ThumbsUp, Trash } from 'phosphor-react';
 import s from './Comment.module.css';
 import { Avatar } from './Avatar';
 
-export function Comment({avatar, content, author, upVotes}) {
+export function Comment({avatar, content, author, upVotes, deleteComment, id, handleUpVote}) {
   return (
     <div className={s.comment}>
       <Avatar url={avatar}/>
@@ -19,7 +19,7 @@ export function Comment({avatar, content, author, upVotes}) {
                 {/*incuir o tempo aqui*/}
               </time>
             </div>
-            <button title="Deletar comentário">
+            <button title="Deletar comentário" onClick={() => deleteComment(id)}>
               <Trash size={24}/>
             </button>
           </header>
@@ -28,8 +28,8 @@ export function Comment({avatar, content, author, upVotes}) {
           </p>
         </div>
         <footer>
-          <button>
-            <ThumbsUp />
+          <button onClick={()=>handleUpVote(id)}>
+            <ThumbsUp/>
             Aplaudir<span>{upVotes}</span>
           </button>
         </footer>
